@@ -178,7 +178,7 @@ export default function SavingsTracker() {
 
     if (monthlySavingsNeeded > availableSavings) {
       setResult(
-        "Oops! Your expenses and savings goal exceed your monthly salary. Try a longer time frame, reduce expenses, or choose a cheaper product."
+        "Oops! Unless you're a time traveler or have a secret money tree, that's impossible! Try a longer time frame, reduce expenses, or choose a cheaper product."
       );
     } else {
       const currencySymbol =
@@ -202,6 +202,11 @@ export default function SavingsTracker() {
       placeholder={placeholder}
     />
   );
+
+  const handleTimeFrameChange = (field: keyof TimeFrame, value: string) => {
+    const numValue = parseInt(value) || 0;
+    setTimeFrame(prev => ({ ...prev, [field]: numValue }));
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-white transition-colors duration-200 rounded">
@@ -253,41 +258,27 @@ export default function SavingsTracker() {
           <div className="flex space-x-2">
             <input
               type="number"
-              value={timeFrame.years}
-              onChange={(e) =>
-                setTimeFrame({
-                  ...timeFrame,
-                  years: parseInt(e.target.value) || 0,
-                })
-              }
+              value={timeFrame.years || ""}
+              onChange={(e) => handleTimeFrameChange("years", e.target.value)}
               min="0"
               className="w-1/3 p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
               placeholder="Years"
             />
             <input
               type="number"
-              value={timeFrame.months}
-              onChange={(e) =>
-                setTimeFrame({
-                  ...timeFrame,
-                  months: parseInt(e.target.value) || 0,
-                })
-              }
+              value={timeFrame.months || ""}
+              onChange={(e) => handleTimeFrameChange("months", e.target.value)}
               min="0"
+              max="11"
               className="w-1/3 p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
               placeholder="Months"
             />
             <input
               type="number"
-              value={timeFrame.days}
-              onChange={(e) =>
-                setTimeFrame({
-                  ...timeFrame,
-                  days: parseInt(e.target.value) || 0,
-                })
-              }
+              value={timeFrame.days || ""}
+              onChange={(e) => handleTimeFrameChange("days", e.target.value)}
               min="0"
-              max="29"
+              max="30"
               className="w-1/3 p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
               placeholder="Days"
             />
