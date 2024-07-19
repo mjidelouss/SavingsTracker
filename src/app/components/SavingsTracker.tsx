@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { audiowide, honk } from "./fonts";
 import Coin from "./coin";
 
@@ -10,16 +10,36 @@ interface Currency {
 }
 
 interface TimeFrame {
+  years: number;
   months: number;
   days: number;
+}
+
+interface Expenses {
+  food: string;
+  rent: string;
+  utilities: string;
+  familyObligations: string;
+  other: string;
 }
 
 export default function SavingsTracker() {
   const [monthlySalary, setMonthlySalary] = useState<string>("");
   const [productPrice, setProductPrice] = useState<string>("");
-  const [timeFrame, setTimeFrame] = useState<TimeFrame>({ months: 1, days: 0 });
+  const [timeFrame, setTimeFrame] = useState<TimeFrame>({
+    years: 0,
+    months: 1,
+    days: 0,
+  });
   const [currency, setCurrency] = useState<string>("USD");
   const [result, setResult] = useState<string | null>(null);
+  const [expenses, setExpenses] = useState<Expenses>({
+    food: "",
+    rent: "",
+    utilities: "",
+    familyObligations: "",
+    other: "",
+  });
 
   const currencies: Currency[] = [
     { code: "USD", symbol: "$" }, // United States Dollar
@@ -127,36 +147,61 @@ export default function SavingsTracker() {
   const resetForm = () => {
     setMonthlySalary("");
     setProductPrice("");
-    setTimeFrame({ months: 1, days: 0 });
+    setTimeFrame({ years: 0, months: 1, days: 0 });
     setCurrency("USD");
     setResult(null);
+    setExpenses({
+      food: "",
+      rent: "",
+      utilities: "",
+      familyObligations: "",
+      other: "",
+    });
   };
 
   const calculateSavings = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const totalDays = timeFrame.months * 30 + timeFrame.days;
+    const totalDays =
+      timeFrame.years * 365 + timeFrame.months * 30 + timeFrame.days;
     if (totalDays < 30) {
       setResult("Time frame must be at least 1 month!");
       return;
     }
 
     const totalMonths = totalDays / 30;
-    const monthlySavings = parseFloat(productPrice) / totalMonths;
+    const totalExpenses = Object.values(expenses).reduce(
+      (sum, expense) => sum + (parseFloat(expense) || 0),
+      0
+    );
+    const monthlySavingsNeeded = parseFloat(productPrice) / totalMonths;
+    const availableSavings = parseFloat(monthlySalary) - totalExpenses;
 
-    if (monthlySavings > parseFloat(monthlySalary)) {
+    if (monthlySavingsNeeded > availableSavings) {
       setResult(
-        "Oops! Unless you're a time traveler or have a secret money tree, that's impossible! Try a longer time frame or a cheaper product."
+        "Oops! Your expenses and savings goal exceed your monthly salary. Try a longer time frame, reduce expenses, or choose a cheaper product."
       );
     } else {
       const currencySymbol =
         currencies.find((c) => c.code === currency)?.symbol || "$";
       setResult(
-        `You need to save ${currencySymbol}${monthlySavings.toFixed(
+        `You need to save ${currencySymbol}${monthlySavingsNeeded.toFixed(
           2
-        )} per month.`
+        )} per month. Your available savings after expenses: ${currencySymbol}${availableSavings.toFixed(
+          2
+        )}`
       );
     }
   };
+
+  const renderExpenseInput = (key: keyof Expenses, placeholder: string) => (
+    <input
+      type="number"
+      value={expenses[key]}
+      onChange={(e) => setExpenses({ ...expenses, [key]: e.target.value })}
+      className="w-full p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+      placeholder={placeholder}
+    />
+  );
 
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-white transition-colors duration-200 rounded">
@@ -208,6 +253,19 @@ export default function SavingsTracker() {
           <div className="flex space-x-2">
             <input
               type="number"
+              value={timeFrame.years}
+              onChange={(e) =>
+                setTimeFrame({
+                  ...timeFrame,
+                  years: parseInt(e.target.value) || 0,
+                })
+              }
+              min="0"
+              className="w-1/3 p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              placeholder="Years"
+            />
+            <input
+              type="number"
               value={timeFrame.months}
               onChange={(e) =>
                 setTimeFrame({
@@ -216,7 +274,7 @@ export default function SavingsTracker() {
                 })
               }
               min="0"
-              className="w-1/2 p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              className="w-1/3 p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
               placeholder="Months"
             />
             <input
@@ -230,16 +288,31 @@ export default function SavingsTracker() {
               }
               min="0"
               max="29"
-              className="w-1/2 p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              className="w-1/3 p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
               placeholder="Days"
             />
           </div>
         </div>
 
         <div>
+          <label className={`block mb-1 ${audiowide.className}`}>
+            Monthly Expenses:
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {renderExpenseInput("food", "Food")}
+            {renderExpenseInput("rent", "Rent")}
+            {renderExpenseInput("utilities", "Utilities")}
+            {renderExpenseInput("familyObligations", "Family Obligations")}
+          </div>
+          <div className="mt-2 flex justify-center">
+            {renderExpenseInput("other", "Other Expenses")}
+          </div>
+        </div>
+
+        <div>
           <label
             htmlFor="currency"
-            className={` block mb-1 ${audiowide.className}`}
+            className={`block mb-1 ${audiowide.className}`}
           >
             Currency:
           </label>
