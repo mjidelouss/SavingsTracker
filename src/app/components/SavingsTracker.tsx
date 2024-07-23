@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { audiowide, honk } from "./fonts";
 import Coin from "./coin";
+import Header from "./Header";
 
 interface Currency {
   code: string;
@@ -213,7 +214,8 @@ export default function SavingsTracker() {
       <h1 className={`text-5xl text-center mb-6 ${honk.className}`}>
         Savings Tracker
       </h1>
-      <div className="flex justify-center">
+      <Header />
+      <div className="flex justify-center mt-5">
         <Coin />
       </div>
       <form onSubmit={calculateSavings} className="space-y-4">
