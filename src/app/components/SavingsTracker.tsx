@@ -169,7 +169,8 @@ export default function SavingsTracker() {
       return;
     }
 
-    const totalMonths = totalDays / 30;
+    const totalMonths =
+      timeFrame.years * 12 + timeFrame.months + timeFrame.days / 30;
     const totalExpenses = Object.values(expenses).reduce(
       (sum, expense) => sum + (parseFloat(expense) || 0),
       0
@@ -189,7 +190,11 @@ export default function SavingsTracker() {
           2
         )} per month. Your available savings after expenses: ${currencySymbol}${availableSavings.toFixed(
           2
-        )}`
+        )}. Total savings over ${totalMonths.toFixed(
+          1
+        )} months: ${currencySymbol}${(
+          monthlySavingsNeeded * totalMonths
+        ).toFixed(2)}`
       );
     }
   };
@@ -206,7 +211,7 @@ export default function SavingsTracker() {
 
   const handleTimeFrameChange = (field: keyof TimeFrame, value: string) => {
     const numValue = parseInt(value) || 0;
-    setTimeFrame(prev => ({ ...prev, [field]: numValue }));
+    setTimeFrame((prev) => ({ ...prev, [field]: numValue }));
   };
 
   return (
