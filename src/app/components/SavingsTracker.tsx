@@ -178,7 +178,7 @@ export default function SavingsTracker() {
 
     if (monthlySavingsNeeded > availableSavings) {
       setResult(
-        "Oops! Unless you're a time traveler or have a secret money tree, that's impossible! Try a longer time frame, reduce expenses, or choose a cheaper product."
+        "Oops! Unless you're a time traveler or have a secret money tree, that's impossible! Try a longer time frame, reduce expenses, or choose a cheaper desired amount."
       );
     } else {
       const currencySymbol =
@@ -239,7 +239,7 @@ export default function SavingsTracker() {
             htmlFor="productPrice"
             className={`block mb-1 ${audiowide.className}`}
           >
-            Product Price:
+            Desired Amount:
           </label>
           <input
             type="number"
