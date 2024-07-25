@@ -10,12 +10,6 @@ interface Currency {
   symbol: string;
 }
 
-interface TimeFrame {
-  years: number;
-  months: number;
-  days: number;
-}
-
 interface Expenses {
   food: string;
   rent: string;
@@ -27,11 +21,6 @@ interface Expenses {
 export default function SavingsTracker() {
   const [monthlySalary, setMonthlySalary] = useState<string>("");
   const [productPrice, setProductPrice] = useState<string>("");
-  const [timeFrame, setTimeFrame] = useState<TimeFrame>({
-    years: 0,
-    months: 1,
-    days: 0,
-  });
   const [currency, setCurrency] = useState<string>("USD");
   const [result, setResult] = useState<string | null>(null);
   const [expenses, setExpenses] = useState<Expenses>({
@@ -148,7 +137,6 @@ export default function SavingsTracker() {
   const resetForm = () => {
     setMonthlySalary("");
     setProductPrice("");
-    setTimeFrame({ years: 0, months: 1, days: 0 });
     setCurrency("USD");
     setResult(null);
     setExpenses({
@@ -162,34 +150,39 @@ export default function SavingsTracker() {
 
   const calculateSavings = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const totalDays =
-      timeFrame.years * 365 + timeFrame.months * 30 + timeFrame.days;
-    if (totalDays < 30) {
-      setResult("Time frame must be at least 1 month!");
-      return;
-    }
-
-    const totalMonths = timeFrame.years * 12 + timeFrame.months + timeFrame.days / 30;
     const totalExpenses = Object.values(expenses).reduce(
       (sum, expense) => sum + (parseFloat(expense) || 0),
       0
     );
-    const monthlySavingsNeeded = parseFloat(productPrice) / totalMonths;
     const availableSavings = parseFloat(monthlySalary) - totalExpenses;
+    const desiredAmount = parseFloat(productPrice);
 
-    if (monthlySavingsNeeded > availableSavings) {
+    if (availableSavings <= 0) {
       setResult(
-        "Oops! Unless you're a time traveler or have a secret money tree, that's impossible! Try a longer time frame, reduce expenses, or choose a cheaper desired amount."
+        "Oops! Your expenses are higher than your income. You need to reduce expenses or increase income to start saving."
       );
     } else {
+      const monthsToSave = Math.ceil(desiredAmount / availableSavings);
+      const years = Math.floor(monthsToSave / 12);
+      const remainingMonths = monthsToSave % 12;
+
       const currencySymbol =
         currencies.find((c) => c.code === currency)?.symbol || "$";
+      
+      let timeString = "";
+      if (years > 0) {
+        timeString += `${years} year${years > 1 ? 's' : ''}`;
+        if (remainingMonths > 0) {
+          timeString += ` and ${remainingMonths} month${remainingMonths > 1 ? 's' : ''}`;
+        }
+      } else {
+        timeString = `${remainingMonths} month${remainingMonths > 1 ? 's' : ''}`;
+      }
+
       setResult(
-        `You need to save ${currencySymbol}${monthlySavingsNeeded.toFixed(
+        `The fastest way to save for your desired amount is to save ${currencySymbol}${availableSavings.toFixed(
           2
-        )} per month. Your available savings after expenses: ${currencySymbol}${availableSavings.toFixed(
-          2
-        )}`
+        )} per month. You will reach your goal of ${currencySymbol}${desiredAmount.toFixed(2)} in ${timeString}.`
       );
     }
   };
@@ -203,11 +196,6 @@ export default function SavingsTracker() {
       placeholder={placeholder}
     />
   );
-
-  const handleTimeFrameChange = (field: keyof TimeFrame, value: string) => {
-    const numValue = parseInt(value) || 0;
-    setTimeFrame(prev => ({ ...prev, [field]: numValue }));
-  };
 
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-white transition-colors duration-200 rounded">
@@ -251,40 +239,6 @@ export default function SavingsTracker() {
             required
             className="w-full p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
           />
-        </div>
-
-        <div>
-          <label className={`block mb-1 ${audiowide.className}`}>
-            Time Frame:
-          </label>
-          <div className="flex space-x-2">
-            <input
-              type="number"
-              value={timeFrame.years || ""}
-              onChange={(e) => handleTimeFrameChange("years", e.target.value)}
-              min="0"
-              className="w-1/3 p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
-              placeholder="Years"
-            />
-            <input
-              type="number"
-              value={timeFrame.months || ""}
-              onChange={(e) => handleTimeFrameChange("months", e.target.value)}
-              min="0"
-              max="11"
-              className="w-1/3 p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
-              placeholder="Months"
-            />
-            <input
-              type="number"
-              value={timeFrame.days || ""}
-              onChange={(e) => handleTimeFrameChange("days", e.target.value)}
-              min="0"
-              max="30"
-              className="w-1/3 p-2 border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
-              placeholder="Days"
-            />
-          </div>
         </div>
 
         <div>
