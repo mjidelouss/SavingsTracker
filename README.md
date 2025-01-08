@@ -1,3 +1,3 @@
-# Calculate Your Savings Goals Based on Salary and Expenses to Reach Your Desired Amount Within Your Chosen Timeframe.
+# Calculate Your Savings Goals Based on Salary and Expenses.
 
 - Visit Site : https://savings-tracker-orpin.vercel.app/
